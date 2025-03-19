@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # manipulating my ssh client config file to accept private key and authenticate without a password.
-host ubuntu
-     HostName 172.22.178.95
-     User ubuntu
+Host *
+     
      IdentityFile ~/.ssh/school
      PasswordAuthentication no 
