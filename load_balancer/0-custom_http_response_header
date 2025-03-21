@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#Installing Nginx and configuring it
+
+sudo apt update -y
+sudo apt install nginx -y
+
+ufw enable
+ufw allow 'Nginx HTTP'
+ufw allow 'OpenSSH'
+
+echo 'Holberton School' > /var/www/html/index.html
+
+sed -i "/server_name _;/a \\\tadd_header X-Served-By \$HOSTNAME;" /etc/nginx/sites-available/default
+
+service nginx restart
