@@ -1,15 +1,29 @@
 #!/usr/bin/env bash
-#Installing Nginx and configuring it
+# Configure Nginx with custom HTTP response header X-Served-By on a new Ubuntu machine
 
-sudo apt update -y
-sudo apt install nginx -y
+sudo apt-get update
+sudo apt-get install -y nginx
 
-ufw enable
-ufw allow 'Nginx HTTP'
-ufw allow 'OpenSSH'
+HOSTNAME=$(hostname)
 
-echo 'Holberton School' > /var/www/html/index.html
+echo "Hello World!" | sudo tee /var/www/html/index.html > /dev/null
 
-sed -i "/server_name _;/a \\\tadd_header X-Served-By \$HOSTNAME;" /etc/nginx/sites-available/default
+sudo bash -c "cat > /etc/nginx/sites-enabled/default << 'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    
+    server_name _;
 
-service nginx restart
+    add_header X-Served-By \$hostname;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+EOF"
+
+sudo nginx -t
+sudo service nginx restart
+echo "Nginx configured with X-Served-By header set to $HOSTNAME"
