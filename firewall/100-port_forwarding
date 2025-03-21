@@ -1,0 +1,74 @@
+#
+# rules.before
+#
+# Rules that should be run before the ufw command line added rules. Custom
+# rules should be added to one of these chains: ufw-before-input,
+# ufw-before-output, or ufw-before-forward
+#
+
+# NAT table rules for port forwarding
+*nat
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-ports 80
+COMMIT
+
+# Don't delete these required lines, otherwise there will be errors
+*filter
+:ufw-before-input - [0:0]
+:ufw-before-output - [0:0]
+:ufw-before-forward - [0:0]
+:ufw-user-input - [0:0]
+:ufw-user-output - [0:0]
+:ufw-user-forward - [0:0]
+:ufw-before-logging-input - [0:0]
+:ufw-before-logging-output - [0:0]
+:ufw-before-logging-forward - [0:0]
+:ufw-after-input - [0:0]
+:ufw-after-output - [0:0]
+:ufw-after-forward - [0:0]
+:ufw-after-logging-input - [0:0]
+:ufw-after-logging-output - [0:0]
+:ufw-after-logging-forward - [0:0]
+:ufw-logging-deny - [0:0]
+:ufw-logging-allow - [0:0]
+:ufw-user-limit - [0:0]
+:ufw-user-limit-accept - [0:0]
+
+# allow all on loopback
+-A ufw-before-input -i lo -j ACCEPT
+-A ufw-before-output -o lo -j ACCEPT
+
+# quickly process packets that have already been accepted
+-A ufw-before-input -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A ufw-before-output -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# drop INVALID packets
+-A ufw-before-input -m conntrack --ctstate INVALID -j DROP
+
+# ok icmp codes for INPUT
+-A ufw-before-input -p icmp --icmp-type destination-unreachable -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type time-exceeded -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type parameter-problem -j ACCEPT
+-A ufw-before-input -p icmp --icmp-type echo-request -j ACCEPT
+
+# ok icmp code for FORWARD
+-A ufw-before-forward -p icmp --icmp-type destination-unreachable -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type time-exceeded -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type parameter-problem -j ACCEPT
+-A ufw-before-forward -p icmp --icmp-type echo-request -j ACCEPT
+
+# end required lines
+
+# don't log noisy services by default
+-A ufw-before-input -p udp --dport 137 -j DROP
+-A ufw-before-input -p udp --dport 138 -j DROP
+-A ufw-before-input -p tcp --dport 139 -j DROP
+-A ufw-before-input -p tcp --dport 445 -j DROP
+-A ufw-before-input -p udp --dport 67 -j DROP
+-A ufw-before-input -p udp --dport 68 -j DROP
+
+# put your custom rules here
+
+# end custom rules
+
+COMMIT
