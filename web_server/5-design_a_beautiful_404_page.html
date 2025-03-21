@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Script to configure a beautiful 404 Not Found page on Ubuntu with nginx
+
+apt-get update
+apt-get install -y nginx
+
+cat > /var/www/html/404.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Not Found</title>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+        }
+        h1 {
+            font-size: 120px;
+            margin: 0;
+            color: #ff6b6b;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        p {
+            font-size: 24px;
+            color: #333;
+            margin: 20px 0;
+     }
+        .message {
+            font-style: italic;
+            color: #764ba2;
+            font-size: 28px;
+            margin: 20px 0;
+        }
+        a {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: transform 0.3s ease;
+        }
+        a:hover {
+            transform: scale(1.05);
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>Oops! Page not found.</p>
+        <div class="message">Ceci n'est pas une page</div>
+        <a href="/">Return Home</a>
+    </div>
+</body>
+</html>
+EOF
+
+# Configure nginx
+cat > /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name 3.87.215.189;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+    }
+}
+EOF
+nginx -t
+service nginx restart
