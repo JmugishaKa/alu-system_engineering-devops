@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # Configure Nginx with custom HTTP response header X-Served-By on a new Ubuntu machine
 
+# Update package list and install nginx
 sudo apt-get update
 sudo apt-get install -y nginx
 
+# Get the hostname of the server
 HOSTNAME=$(hostname)
 
+# Create basic index page
 echo "Hello World!" | sudo tee /var/www/html/index.html > /dev/null
 
+# Configure Nginx with custom header
 sudo bash -c "cat > /etc/nginx/sites-enabled/default << 'EOF'
 server {
     listen 80;
@@ -15,7 +19,8 @@ server {
     
     server_name _;
 
-    add_header X-Served-By \$hostname;
+    # Add custom header with hostname
+    add_header X-Served-By \"$HOSTNAME\";
 
     location / {
         root /var/www/html;
@@ -24,6 +29,12 @@ server {
 }
 EOF"
 
-sudo nginx -t
-sudo service nginx restart
-echo "Nginx configured with X-Served-By header set to $HOSTNAME"
+# Test Nginx configuration
+if sudo nginx -t; then
+    # Restart Nginx service only if config test passes
+    sudo service nginx restart
+    echo "Nginx configured with X-Served-By header set to $HOSTNAME"
+else
+    echo "Nginx configuration test failed. Please check /etc/nginx/sites-enabled/default"
+    exit 1
+fi
