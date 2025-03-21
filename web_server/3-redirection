@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
-# Configure your Nginx server so that /redirect_me is redirecting to another page
-
+# Configure Nginx server on a new Ubuntu machine with /redirect_me redirect
 sudo apt-get update
 sudo apt-get install -y nginx
 
-echo "Hello World!" | sudo tee /var/www/html/index.html
-new_route="server_name 3.87.215.189;\n\trewrite ^\/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;"
-sudo sed -i "s|server_name 3.87.215.189;|$new_route|" /etc/nginx/sites-enabled/default
+echo "Hello World!" | sudo tee /var/www/html/index.html > /dev/null
 
+sudo bash -c "cat > /etc/nginx/sites-enabled/default << 'EOF'
+server {
+    listen 80;
+    listen [::]:80;
+    
+    server_name 3.87.215.189;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+}
+EOF"
+sudo nginx -t
 sudo service nginx restart
-~                                                                                                                                    ~                              
